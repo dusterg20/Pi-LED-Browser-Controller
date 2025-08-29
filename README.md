@@ -128,7 +128,7 @@ WantedBy=multi-user.target
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable rgb-node
-sudo systemctl start egb-node
+sudo systemctl start rgb-node
 ```
 ### 🧱 Project Architecture
 
