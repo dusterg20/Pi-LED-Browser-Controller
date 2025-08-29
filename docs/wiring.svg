@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="980" height="540" viewBox="0 0 980 540" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .box{fill:#f8fafc;stroke:#94a3b8;stroke-width:2}
+      .pi{fill:#eef2ff;stroke:#6366f1;stroke-width:2}
+      .mos{fill:#fef3c7;stroke:#d97706;stroke-width:2}
+      .led{fill:#ecfeff;stroke:#06b6d4;stroke-width:2}
+      .psu{fill:#e5f9e7;stroke:#16a34a;stroke-width:2}
+      .text{font:600 14px system-ui, -apple-system, Segoe UI, Roboto}
+      .small{font:500 12px system-ui, -apple-system, Segoe UI, Roboto}
+      .wire{stroke:#111827;stroke-width:3;fill:none;stroke-linecap:round}
+      .red{stroke:#ef4444}
+      .grn{stroke:#22c55e}
+      .blu{stroke:#3b82f6}
+      .gnd{stroke:#111827;stroke-dasharray:6 6}
+      .vcc{stroke:#f59e0b}
+      .pin{fill:#111827}
+      .dot{fill:#111827}
+      .pulldown{stroke:#000;stroke-width:2}
+      .label{fill:#111827}
+    </style>
+  </defs>
+
+  <!-- Raspberry Pi -->
+  <rect x="40" y="60" rx="12" ry="12" width="260" height="340" class="pi"/>
+  <text x="170" y="88" text-anchor="middle" class="text">Raspberry Pi</text>
+  <!-- GPIO pins of interest -->
+  <circle cx="80" cy="140" r="4" class="pin"/><text x="90" y="144" class="small">GPIO17 (R)</text>
+  <circle cx="80" cy="180" r="4" class="pin"/><text x="90" y="184" class="small">GPIO22 (G)</text>
+  <circle cx="80" cy="220" r="4" class="pin"/><text x="90" y="224" class="small">GPIO24 (B)</text>
+  <circle cx="80" cy="300" r="4" class="pin"/><text x="90" y="304" class="small">GND</text>
+
+  <!-- Power Supply -->
+  <rect x="700" y="70" rx="10" ry="10" width="220" height="120" class="psu"/>
+  <text x="810" y="96" text-anchor="middle" class="text">LED Power Supply</text>
+  <text x="810" y="116" text-anchor="middle" class="small">(e.g. 12 VDC)</text>
+  <circle cx="740" cy="150" r="4" class="dot"/><text x="750" y="154" class="small">+V</text>
+  <circle cx="880" cy="150" r="4" class="dot"/><text x="890" y="154" class="small">GND</text>
+
+  <!-- LED Strip -->
+  <rect x="700" y="250" rx="10" ry="10" width="220" height="180" class="led"/>
+  <text x="810" y="276" text-anchor="middle" class="text">RGB LED Strip</text>
+  <circle cx="740" cy="310" r="4" class="dot"/><text x="750" y="314" class="small">R−</text>
+  <circle cx="740" cy="350" r="4" class="dot"/><text x="750" y="354" class="small">G−</text>
+  <circle cx="740" cy="390" r="4" class="dot"/><text x="750" y="394" class="small">B−</text>
+  <circle cx="880" cy="310" r="4" class="dot"/><text x="890" y="314" class="small">+V (common)</text>
+  <line x1="740" y1="310" x2="880" y2="310" class="wire vcc" stroke-dasharray="5 5"/>
+  <line x1="740" y1="350" x2="880" y2="350" class="wire vcc" stroke-dasharray="5 5"/>
+  <line x1="740" y1="390" x2="880" y2="390" class="wire vcc" stroke-dasharray="5 5"/>
+
+  <!-- MOSFETs -->
+  <!-- R -->
+  <rect x="420" y="110" rx="8" ry="8" width="180" height="90" class="mos"/>
+  <text x="510" y="128" text-anchor="middle" class="small">IRLZ34N (Red)</text>
+  <text x="430" y="156" class="small">G</text>
+  <text x="500" y="156" class="small">D</text>
+  <text x="570" y="156" class="small">S</text>
+  <!-- symbols (gate-drain-source dots) -->
+  <circle cx="440" cy="170" r="4" class="dot"/>
+  <circle cx="510" cy="170" r="4" class="dot"/>
+  <circle cx="580" cy="170" r="4" class="dot"/>
+
+  <!-- G pulldown -->
+  <line x1="440" y1="175" x2="440" y2="205" class="pulldown"/>
+  <line x1="430" y1="205" x2="450" y2="205" class="pulldown"/>
+  <text x="456" y="207" class="small">10 kΩ → GND</text>
+
+  <!-- G -->
+  <rect x="420" y="230" rx="8" ry="8" width="180" height="90" class="mos"/>
+  <text x="510" y="248" text-anchor="middle" class="small">IRLZ34N (Green)</text>
+  <text x="430" y="276" class="small">G</text>
+  <text x="500" y="276" class="small">D</text>
+  <text x="570" y="276" class="small">S</text>
+  <circle cx="440" cy="290" r="4" class="dot"/>
+  <circle cx="510" cy="290" r="4" class="dot"/>
+  <circle cx="580" cy="290" r="4" class="dot"/>
+  <line x1="440" y1="295" x2="440" y2="325" class="pulldown"/>
+  <line x1="430" y1="325" x2="450" y2="325" class="pulldown"/>
+
+  <!-- B -->
+  <rect x="420" y="350" rx="8" ry="8" width="180" height="90" class="mos"/>
+  <text x="510" y="368" text-anchor="middle" class="small">IRLZ34N (Blue)</text>
+  <text x="430" y="396" class="small">G</text>
+  <text x="500" y="396" class="small">D</text>
+  <text x="570" y="396" class="small">S</text>
+  <circle cx="440" cy="410" r="4" class="dot"/>
+  <circle cx="510" cy="410" r="4" class="dot"/>
+  <circle cx="580" cy="410" r="4" class="dot"/>
+  <line x1="440" y1="415" x2="440" y2="445" class="pulldown"/>
+  <line x1="430" y1="445" x2="450" y2="445" class="pulldown"/>
+
+  <!-- Wires: GPIO -> Gates -->
+  <path d="M80,140 C160,140 300,140 440,170" class="wire red"/>
+  <path d="M80,180 C160,180 300,210 440,290" class="wire grn"/>
+  <path d="M80,220 C160,220 300,300 440,410" class="wire blu"/>
+  <text x="200" y="132" class="small label">~150 Ω series resistor optional</text>
+
+  <!-- Wires: Drains -> LED negatives -->
+  <path d="M580,170 C640,170 700,300 740,310" class="wire red"/>
+  <path d="M580,290 C640,290 700,340 740,350" class="wire grn"/>
+  <path d="M580,410 C640,410 700,380 740,390" class="wire blu"/>
+
+  <!-- Wires: Sources -> Ground -->
+  <path d="M580,170 C600,170 620,300 620,470  C620,490 590,500 560,500" class="wire gnd"/>
+  <path d="M580,290 C600,290 610,330 610,470  C610,490 590,500 560,500" class="wire gnd"/>
+  <path d="M580,410 C600,410 600,430 600,470  C600,490 590,500 560,500" class="wire gnd"/>
+
+  <!-- Ground bus -->
+  <line x1="560" y1="500" x2="140" y2="500" class="wire gnd"/>
+  <path d="M80,300 C80,360 100,480 140,500" class="wire gnd"/>
+  <line x1="880" y1="150" x2="880" y2="500" class="wire gnd"/>
+  <text x="300" y="520" class="small">COMMON GROUND between Pi, MOSFET sources, and LED PSU</text>
+
+  <!-- +V from PSU to LED +V -->
+  <line x1="740" y1="150" x2="880" y2="310" class="wire vcc"/>
+  <line x1="740" y1="150" x2="880" y2="350" class="wire vcc"/>
+  <line x1="740" y1="150" x2="880" y2="390" class="wire vcc"/>
+  <text x="820" y="210" class="small">PSU +V → LED strip +V (common)</text>
+
+  <!-- Notes -->
+  <text x="40" y="520" class="small">Use logic-level MOSFETs (IRLZ34N). Gate pulldown 10 kΩ to prevent ghosting at boot.</text>
+</svg>
