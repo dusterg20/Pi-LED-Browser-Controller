@@ -31,9 +31,9 @@ The project consists of:
 - External power supply for the LED strip (common ground with Pi)  
 
 ### GPIO Mapping
-- GPIO17 → Red MOSFET gate  
-- GPIO22 → Green MOSFET gate  
-- GPIO24 → Blue MOSFET gate  
+- GPIO23 → Red MOSFET gate  
+- GPIO24 → Green MOSFET gate  
+- GPIO25 → Blue MOSFET gate  
 - All grounds tied together  
 
 ---
@@ -64,7 +64,8 @@ sudo apt-get upgrade -y
 ### 2. Install pigpiod
 ```bash
 sudo apt-get install -y pigpio
-sudo systemctl enable --now pigpiod
+sudo systemctl enable pigpiod
+sudo systemctl start pigpiod
 ```
 
 ### 3. Install Node.js (via NVM)
@@ -126,7 +127,8 @@ WantedBy=multi-user.target
 #### Enable and start:
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now rgb-node
+sudo systemctl enable rgb-node
+sudo systemctl start egb-node
 ```
 
 ### 📸 Screenshots
