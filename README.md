@@ -130,6 +130,22 @@ sudo systemctl daemon-reload
 sudo systemctl enable rgb-node
 sudo systemctl start egb-node
 ```
+### 🧱 Project Architecture
+
+- **Browser UI (mobile-first)**  
+  Sends HTTP JSON commands to the Node server and listens for **SSE (Server-Sent Events)** for live state updates.
+
+- **Node.js (Fastify)**  
+  Translates UI intents into PWM values and communicates with **pigpio** over the network.
+
+- **pigpiod**  
+  Drives the Raspberry Pi’s **GPIO pins** configured for PWM.
+
+- **IRLZ34N MOSFETs**  
+  Switch the LED strip’s **R/G/B channels** against a shared +V supply.
+
+- **Common Ground**  
+  Raspberry Pi GND, MOSFET sources, and PSU GND are all tied together.
 
 ### 📸 Screenshots
 
