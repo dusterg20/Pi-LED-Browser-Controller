@@ -54,7 +54,7 @@ The project consists of:
 
 ## 💻 Software Setup (Raspberry Pi)
 
-### Step 1: Update system
+### 1: Update system
 ```bash
 sudo apt-get update
 sudo apt-get upgrade -y
