@@ -7,16 +7,16 @@
   <style>
     :root{
       /* DARK (default) */
-      --bg:#0b0f15;               /* page background */
-      --bg-grad1:#1a2440;         /* header gradient start */
-      --panel:#0f1623;            /* card/panel surface */
-      --surface2:#121a2b;         /* chips, sliders, ghost buttons */
-      --text:#e5e7eb;             /* primary text */
-      --muted:#9aa3b2;            /* secondary text */
+      --bg:#0b0f15;
+      --bg-grad1:#1a2440;
+      --panel:#0f1623;
+      --surface2:#121a2b;
+      --text:#e5e7eb;
+      --muted:#9aa3b2;
       --border:rgba(255,255,255,.12);
-      --track:#2b3347;            /* range track */
-      --accent:#60a5fa;           /* dynamic accent (updated by JS) */
-      --ring:#60a5fa33;           /* focus ring */
+      --track:#2b3347;
+      --accent:#60a5fa;
+      --ring:#60a5fa33;
       --shadow:0 10px 30px rgba(0,0,0,.45);
     }
     @media (prefers-color-scheme: light){
@@ -36,7 +36,7 @@
     html,body{ height:100%; }
     body{
       margin:0; background:radial-gradient(1200px 800px at 50% -10%, var(--bg-grad1) 0%, var(--bg) 40%, var(--bg) 100%);
-      color:var(--text); font:500 16px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial;
+      color:var(--text); font:500 16px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Inter,"Helvetica Neue",Arial;
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
     .shell{ min-height:100%; display:grid; grid-template-rows:auto 1fr auto; gap:16px; padding:18px env(safe-area-inset-right) 22px env(safe-area-inset-left); max-width:820px; margin:0 auto; }
@@ -57,7 +57,7 @@
 
     .btn{ appearance:none; border:none; background:var(--surface2); color:var(--text); padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:700; transition:transform .06s ease, background .2s ease, box-shadow .2s ease; box-shadow: inset 0 0 0 1px var(--border), 0 8px 20px rgba(0,0,0,.35); }
     .btn:active{ transform:translateY(1px) scale(0.99); }
-    .btn.primary{ background:var(--accent); color:#fff; box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 40%, transparent); }
+    .btn.primary{ background:var(--accent); color:#fff; box-shadow: 0 10px 24px rgba(96,165,250,.4); }
     .btn.ghost{ background:transparent; box-shadow:inset 0 0 0 1px var(--border); color:var(--text); }
     .btn.small{ padding:8px 10px; border-radius:10px; font-size:13px; }
     .toolbar{ display:flex; gap:10px; flex-wrap:wrap; }
@@ -69,7 +69,7 @@
 
     .slider{ width:100%; height:42px; display:flex; align-items:center; gap:12px; background:var(--surface2); border-radius:12px; padding:0 12px; border:1px solid var(--border); }
     input[type="range"]{ -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; background:var(--track); outline:none; }
-    input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:var(--accent); box-shadow:0 8px 16px color-mix(in srgb, var(--accent) 40%, transparent), 0 0 0 6px var(--ring); border:2px solid #fff; cursor:pointer; }
+    input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:var(--accent); box-shadow:0 8px 16px rgba(96,165,250,.4), 0 0 0 6px var(--ring); border:2px solid #fff; cursor:pointer; }
 
     input[type="color"]{ appearance:none; width:56px; height:42px; border-radius:12px; border:1px solid var(--border); background:transparent; overflow:hidden; padding:0; }
     input[type="color"]::-webkit-color-swatch{ border:none; border-radius:12px; }
@@ -81,6 +81,8 @@
 
     footer{ display:flex; justify-content:space-between; align-items:center; gap:12px; color:var(--muted); font-size:12px; opacity:.9; }
     .link{ color:var(--muted); text-decoration:none; border-bottom:1px dotted var(--border); }
+
+    .hidden{ display:none !important; }
   </style>
 </head>
 <body>
@@ -158,6 +160,19 @@
           <button class="btn ghost small" id="btnStop">Stop</button>
         </div>
 
+        <!-- Effect controls -->
+        <div id="effectStrobe" class="row hidden">
+          <div class="caps">Strobe speed (ms)</div>
+          <div class="grow slider"><input id="strobeSpeed" type="range" min="50" max="2000" value="300" /></div>
+          <div id="strobeSpeedVal" class="chip">300</div>
+        </div>
+
+        <div id="effectPulse" class="row hidden">
+          <div class="caps">Pulse period (ms)</div>
+          <div class="grow slider"><input id="pulsePeriod" type="range" min="1000" max="10000" value="3000" /></div>
+          <div id="pulsePeriodVal" class="chip">3000</div>
+        </div>
+
         <div class="row">
           <div class="caps">Power</div>
           <div class="grow"></div>
@@ -173,63 +188,231 @@
   </div>
 
   <script>
-    const clamp=(n,min,max)=>Math.min(max,Math.max(min,Number(n)||0));
-    const $ = sel=>document.querySelector(sel);
-    const rgbLabel = $('#rgbLabel');
-    const brightLabel = $('#brightLabel');
-    const footState = $('#footState');
+    var clamp=function(n,min,max){ n=Number(n)||0; if(n<min) return min; if(n>max) return max; return n; };
+    var $ = function(sel){ return document.querySelector(sel); };
+    var rgbLabel = $('#rgbLabel');
+    var brightLabel = $('#brightLabel');
+    var footState = $('#footState');
 
-    const inputs = { r: $('#rangeR'), g: $('#rangeG'), b: $('#rangeB'), color: $('#colorPicker'), brightness: $('#brightness'), effect: $('#effect') };
-    const buttons = { off: $('#btnOff'), white: $('#btnWhite'), save: $('#btnSaveScene'), load: $('#btnLoadScene'), stop: $('#btnStop'), power: $('#powerToggle'), reset: $('#resetUI') };
+    var inputs = {
+      r: $('#rangeR'), g: $('#rangeG'), b: $('#rangeB'), color: $('#colorPicker'),
+      brightness: $('#brightness'), effect: $('#effect'),
+      strobeSpeed: $('#strobeSpeed'), pulsePeriod: $('#pulsePeriod')
+    };
+    var buttons = { off: $('#btnOff'), white: $('#btnWhite'), save: $('#btnSaveScene'), load: $('#btnLoadScene'), stop: $('#btnStop'), power: $('#powerToggle'), reset: $('#resetUI') };
 
-    let state = { r:0,g:0,b:0, brightness:100, effect:'none' };
-    let lastColorPost = 0;
+    var state = { r:0,g:0,b:0, brightness:100, effect:'none' };
+    var lastColorPost = 0;
 
-    function updateLabels(){ rgbLabel.textContent = `R ${state.r} · G ${state.g} · B ${state.b}`; brightLabel.textContent = `${state.brightness}%`; footState.textContent = `RGB(${state.r},${state.g},${state.b}) · ${state.brightness}% · ${state.effect}`; }
+    function updateLabels(){
+      rgbLabel.textContent = 'R '+state.r+' · G '+state.g+' · B '+state.b;
+      brightLabel.textContent = state.brightness+'%';
+      footState.textContent = 'RGB('+state.r+','+state.g+','+state.b+') · '+state.brightness+'% · '+state.effect;
+      $('#strobeSpeedVal').textContent = inputs.strobeSpeed.value;
+      $('#pulsePeriodVal').textContent = inputs.pulsePeriod.value;
+    }
 
-    function paintInputsFromState(){ inputs.r.value = state.r; inputs.g.value = state.g; inputs.b.value = state.b; inputs.brightness.value = state.brightness; inputs.color.value = '#'+[state.r,state.g,state.b].map(v=>v.toString(16).padStart(2,'0')).join(''); updateAccentFromColor(); updateLabels(); }
+    function paintInputsFromState(){
+      inputs.r.value = state.r; inputs.g.value = state.g; inputs.b.value = state.b;
+      inputs.brightness.value = state.brightness;
+      inputs.color.value = '#'+[state.r,state.g,state.b].map(function(v){return ('0'+v.toString(16)).slice(-2);}).join('');
+      updateAccentFromColor(); updateLabels();
+    }
 
-    function updateAccentFromColor(){ const root = document.documentElement; const hex = inputs.color.value; root.style.setProperty('--accent', hex); root.style.setProperty('--ring', hex+'33'); }
+    function updateAccentFromColor(){
+      var root = document.documentElement;
+      var hex = inputs.color.value;
+      root.style.setProperty('--accent', hex);
+      root.style.setProperty('--ring', hex+'33');
+    }
 
-    async function getState(){ const res = await fetch('/api/state').then(r=>r.json()).catch(()=>null); if(res && res.ok && res.state){ state = res.state; paintInputsFromState(); } }
+    function showEffectControls(val){
+      $('#effectStrobe').classList.toggle('hidden', val!=='strobe');
+      $('#effectPulse').classList.toggle('hidden', val!=='pulse');
+    }
 
-    const post = (url, data)=>fetch(url,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+    function getState(){
+      return fetch('/api/state').then(function(r){return r.json();}).then(function(res){
+        if(res && res.ok && res.state){ state = res.state; paintInputsFromState(); }
+      })['catch'](function(){});
+    }
 
-    let colorTimer; function queueColorPost(){ clearTimeout(colorTimer); colorTimer = setTimeout(async ()=>{ const now=Date.now(); if(now - lastColorPost < 60){ queueColorPost(); return; } lastColorPost = now; await post('/api/color',{ r:state.r,g:state.g,b:state.b }).catch(()=>{}); }, 80); }
+    function post(url, data){
+      return fetch(url,{ method:'POST', headers:{'Content-Type':'application/json'}, body: data ? JSON.stringify(data) : '{}' });
+    }
 
-    inputs.r.addEventListener('input', e=>{ state.r = clamp(e.target.value,0,255); updateFromRGB(); });
-    inputs.g.addEventListener('input', e=>{ state.g = clamp(e.target.value,0,255); updateFromRGB(); });
-    inputs.b.addEventListener('input', e=>{ state.b = clamp(e.target.value,0,255); updateFromRGB(); });
+    var colorTimer;
+    function queueColorPost(){
+      clearTimeout(colorTimer);
+      colorTimer = setTimeout(function(){
+        var now=Date.now();
+        if(now - lastColorPost < 60){ queueColorPost(); return; }
+        lastColorPost = now;
+        post('/api/color',{ r:state.r,g:state.g,b:state.b })['catch'](function(){});
+      }, 80);
+    }
 
-    function updateFromRGB(){ inputs.color.value = '#'+[state.r,state.g,state.b].map(v=>v.toString(16).padStart(2,'0')).join(''); updateAccentFromColor(); updateLabels(); queueColorPost(); }
+    inputs.r.addEventListener('input', function(e){ state.r = clamp(e.target.value,0,255); updateFromRGB(); });
+    inputs.g.addEventListener('input', function(e){ state.g = clamp(e.target.value,0,255); updateFromRGB(); });
+    inputs.b.addEventListener('input', function(e){ state.b = clamp(e.target.value,0,255); updateFromRGB(); });
 
-    inputs.color.addEventListener('input', e=>{ const hex = e.target.value.replace('#',''); const r = parseInt(hex.slice(0,2),16), g = parseInt(hex.slice(2,4),16), b = parseInt(hex.slice(4,6),16); state.r = r; state.g = g; state.b = b; paintInputsFromState(); queueColorPost(); });
+    function updateFromRGB(){
+      inputs.color.value = '#'+[state.r,state.g,state.b].map(function(v){return ('0'+v.toString(16)).slice(-2);}).join('');
+      updateAccentFromColor(); updateLabels(); queueColorPost();
+    }
 
-    inputs.brightness.addEventListener('input', async e=>{ state.brightness = clamp(e.target.value,0,100); updateLabels(); await post('/api/brightness',{ brightness: state.brightness }).catch(()=>{}); });
+    inputs.color.addEventListener('input', function(e){
+      var hex = e.target.value.replace('#','');
+      var r = parseInt(hex.slice(0,2),16), g = parseInt(hex.slice(2,4),16), b = parseInt(hex.slice(4,6),16);
+      state.r = r; state.g = g; state.b = b;
+      paintInputsFromState(); queueColorPost();
+    });
 
-    inputs.effect.addEventListener('change', async e=>{ state.effect = e.target.value || 'none'; await post('/api/effect',{ effect: state.effect }).catch(()=>{}); updateLabels(); });
+    inputs.brightness.addEventListener('input', function(e){
+      state.brightness = clamp(e.target.value,0,100);
+      updateLabels();
+      post('/api/brightness',{ brightness: state.brightness })['catch'](function(){});
+    });
 
-    buttons.off.addEventListener('click', ()=>{ state.r=state.g=state.b=0; updateFromRGB(); });
-    buttons.white.addEventListener('click', ()=>{ state.r=state.g=state.b=255; updateFromRGB(); });
-    buttons.stop.addEventListener('click', ()=>{ inputs.effect.value='none'; state.effect='none'; post('/api/effect',{effect:'none'}); updateLabels(); });
+    inputs.effect.addEventListener('change', function(e){
+      var uiVal = e.target.value || 'none';
+      state.effect = uiVal;
+      showEffectControls(uiVal);
 
-    buttons.power.addEventListener('click', ()=>{ const any = state.r||state.g||state.b; if(any){ buttons.off.click(); } else{ buttons.white.click(); } });
+      if(uiVal === 'none'){
+        // Stop effect: send empty body
+        post('/api/effect', {})['catch'](function(){});
+      }else if(uiVal === 'strobe'){
+        var sp = clamp(inputs.strobeSpeed.value,50,2000);
+        post('/api/effect', { name:'strobe', speed: sp })['catch'](function(){});
+      }else if(uiVal === 'pulse'){
+        var per = clamp(inputs.pulsePeriod.value,1000,10000);
+        // Server effect is named "breathe"
+        post('/api/effect', { name:'breathe', period: per })['catch'](function(){});
+      }
+      updateLabels();
+    });
 
-    const SCENE_KEY='rgb-scene-A';
-    buttons.save.addEventListener('click', ()=>{ localStorage.setItem(SCENE_KEY, JSON.stringify(state)); toast('Scene saved'); });
-    buttons.load.addEventListener('click', ()=>{ const s = localStorage.getItem(SCENE_KEY); if(!s) return toast('No saved scene yet'); try{ const saved = JSON.parse(s); state = { ...state, ...saved }; paintInputsFromState(); queueColorPost(); post('/api/brightness',{brightness:state.brightness}); post('/api/effect',{effect:state.effect}); toast('Scene loaded'); }catch{ toast('Load failed'); } });
+    inputs.strobeSpeed.addEventListener('input', function(){
+      if(inputs.effect.value==='strobe'){
+        var sp = clamp(inputs.strobeSpeed.value,50,2000);
+        post('/api/effect', { name:'strobe', speed: sp })['catch'](function(){});
+        updateLabels();
+      }
+    });
 
-    buttons.reset.addEventListener('click', ()=>{ localStorage.removeItem(SCENE_KEY); toast('UI storage cleared'); });
+    inputs.pulsePeriod.addEventListener('input', function(){
+      if(inputs.effect.value==='pulse'){
+        var per = clamp(inputs.pulsePeriod.value,1000,10000);
+        post('/api/effect', { name:'breathe', period: per })['catch'](function(){});
+        updateLabels();
+      }
+    });
 
-    const PRESETS = ['#ff0000','#00ff00','#0000ff','#ffff00','#ff00ff','#00ffff','#ffffff','#000000','#ff7f00','#7f00ff','#00ff7f','#7fffff','#ff99cc','#99ccff','#66ff66','#ffcc66'];
-    const swWrap = document.getElementById('swatches');
-    PRESETS.forEach(hex=>{ const d=document.createElement('button'); d.className='swatch'; d.style.background=hex; d.title=hex.toUpperCase(); d.addEventListener('click', ()=>{ const h=hex.replace('#',''); state.r=parseInt(h.slice(0,2),16); state.g=parseInt(h.slice(2,4),16); state.b=parseInt(h.slice(4,6),16); paintInputsFromState(); queueColorPost(); }); swWrap.appendChild(d); });
+    buttons.stop.addEventListener('click', function(){
+      inputs.effect.value='none'; state.effect='none'; showEffectControls('none');
+      post('/api/effect', {})['catch'](function(){});
+      updateLabels();
+    });
 
-    let es; let esRetryDelay=1000; function connectSSE(){ es = new EventSource('/api/events'); const conn=document.getElementById('conn'); conn.classList.remove('ok'); conn.querySelector('span').textContent = 'connecting…'; es.onopen = ()=>{ esRetryDelay=1000; conn.classList.add('ok'); conn.querySelector('span').textContent='live'; }; es.onmessage = ev=>{ if(!ev.data) return; try{ const msg = JSON.parse(ev.data); if(msg.type==='state' && msg.state){ state = msg.state; paintInputsFromState(); } }catch{} }; es.onerror = ()=>{ conn.classList.remove('ok'); conn.querySelector('span').textContent='reconnecting…'; es.close(); setTimeout(connectSSE, esRetryDelay); esRetryDelay = Math.min(15000, esRetryDelay*1.6); }; }
+    buttons.off.addEventListener('click', function(){ state.r=state.g=state.b=0; updateFromRGB(); });
+    buttons.white.addEventListener('click', function(){ state.r=state.g=state.b=255; updateFromRGB(); });
 
-    let toastTimer; function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; Object.assign(t.style,{ position:'fixed', left:'50%', bottom:'24px', transform:'translateX(-50%)', background:'rgba(15,23,42,.9)', color:'#fff', padding:'10px 14px', borderRadius:'10px', border:'1px solid var(--border)', boxShadow:'0 10px 24px rgba(0,0,0,.5)', zIndex:9999, fontWeight:700 }); document.body.appendChild(t); } t.textContent=msg; t.style.opacity='1'; clearTimeout(toastTimer); toastTimer=setTimeout(()=>{ t.style.opacity='0'; },1400); }
+    buttons.power.addEventListener('click', function(){
+      var any = state.r||state.g||state.b;
+      if(any){ buttons.off.click(); } else { buttons.white.click(); }
+    });
 
-    (async function init(){ await getState(); connectSSE(); paintInputsFromState(); })();
+    var SCENE_KEY='rgb-scene-A';
+    buttons.save.addEventListener('click', function(){
+      localStorage.setItem(SCENE_KEY, JSON.stringify({
+        r:state.r,g:state.g,b:state.b,brightness:state.brightness,effect:state.effect,
+        strobeSpeed:inputs.strobeSpeed.value, pulsePeriod:inputs.pulsePeriod.value
+      }));
+      toast('Scene saved');
+    });
+    buttons.load.addEventListener('click', function(){
+      var s = localStorage.getItem(SCENE_KEY);
+      if(!s) return toast('No saved scene yet');
+      try{
+        var saved = JSON.parse(s);
+        state.r=saved.r; state.g=saved.g; state.b=saved.b; state.brightness=saved.brightness;
+        inputs.strobeSpeed.value = saved.strobeSpeed || 300;
+        inputs.pulsePeriod.value = saved.pulsePeriod || 3000;
+        inputs.effect.value = saved.effect || 'none';
+        showEffectControls(inputs.effect.value);
+        paintInputsFromState(); queueColorPost();
+        post('/api/brightness',{brightness:state.brightness});
+        // re-apply effect
+        if(inputs.effect.value==='strobe'){
+          post('/api/effect',{name:'strobe',speed: clamp(inputs.strobeSpeed.value,50,2000)});
+        }else if(inputs.effect.value==='pulse'){
+          post('/api/effect',{name:'breathe',period: clamp(inputs.pulsePeriod.value,1000,10000)});
+        }else{
+          post('/api/effect',{});
+        }
+        toast('Scene loaded');
+      }catch(e){ toast('Load failed'); }
+    });
+
+    buttons.reset.addEventListener('click', function(){ localStorage.removeItem(SCENE_KEY); toast('UI storage cleared'); });
+
+    var PRESETS = ['#ff0000','#00ff00','#0000ff','#ffff00','#ff00ff','#00ffff','#ffffff','#000000','#ff7f00','#7f00ff','#00ff7f','#7fffff','#ff99cc','#99ccff','#66ff66','#ffcc66'];
+    var swWrap = document.getElementById('swatches');
+    PRESETS.forEach(function(hex){
+      var d=document.createElement('button');
+      d.className='swatch'; d.style.background=hex; d.title=hex.toUpperCase();
+      d.addEventListener('click', function(){
+        var h=hex.replace('#','');
+        state.r=parseInt(h.slice(0,2),16); state.g=parseInt(h.slice(2,4),16); state.b=parseInt(h.slice(4,6),16);
+        paintInputsFromState(); queueColorPost();
+      });
+      swWrap.appendChild(d);
+    });
+
+    var es; var esRetryDelay=1000;
+    function connectSSE(){
+      es = new EventSource('/api/events');
+      var conn=document.getElementById('conn');
+      conn.classList.remove('ok');
+      conn.querySelector('span').textContent = 'connecting…';
+      es.onopen = function(){
+        esRetryDelay=1000; conn.classList.add('ok'); conn.querySelector('span').textContent='live';
+      };
+      es.onmessage = function(ev){
+        if(!ev.data) return;
+        try{
+          var msg = JSON.parse(ev.data);
+          if(msg.type==='state' && msg.state){ state = msg.state; paintInputsFromState(); }
+        }catch(e){}
+      };
+      es.onerror = function(){
+        conn.classList.remove('ok'); conn.querySelector('span').textContent='reconnecting…';
+        es.close(); setTimeout(connectSSE, esRetryDelay); esRetryDelay = Math.min(15000, esRetryDelay*1.6);
+      };
+    }
+
+    var toastTimer;
+    function toast(msg){
+      var t=document.getElementById('toast');
+      if(!t){
+        t=document.createElement('div'); t.id='toast';
+        var s=t.style; s.position='fixed'; s.left='50%'; s.bottom='24px'; s.transform='translateX(-50%)';
+        s.background='rgba(15,23,42,.9)'; s.color='#fff'; s.padding='10px 14px'; s.borderRadius='10px';
+        s.border='1px solid var(--border)'; s.boxShadow='0 10px 24px rgba(0,0,0,.5)'; s.zIndex=9999; s.fontWeight=700;
+        document.body.appendChild(t);
+      }
+      t.textContent=msg; t.style.opacity='1'; clearTimeout(toastTimer);
+      toastTimer=setTimeout(function(){ t.style.opacity='0'; },1400);
+    }
+
+    (function init(){
+      getState().then(function(){
+        connectSSE();
+        paintInputsFromState();
+        showEffectControls(inputs.effect.value);
+      });
+    })();
   </script>
 </body>
 </html>
