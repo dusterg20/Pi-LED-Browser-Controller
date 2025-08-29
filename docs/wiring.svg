@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="980" height="540" viewBox="0 0 980 540" xmlns="http://www.w3.org/2000/svg">
+  <rect width="980" height="540" fill="white"/>
   <defs>
     <style>
       .box{fill:#f8fafc;stroke:#94a3b8;stroke-width:2}
