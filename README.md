@@ -149,7 +149,7 @@ sudo systemctl start egb-node
 
 ### 📸 Screenshots
 
-(Insert your screenshots here — mobile + desktop views)
+![Screen Shot](docs/HomeRGB.jpg)
 
 ### 📜 License
 
